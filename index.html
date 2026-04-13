@@ -36,9 +36,7 @@
 
         <button type="submit">Kirim</button>
     </form>
-<div style="display:flex; justify-content:space-between; align-items:center;">
     <h3>Data Terkumpul</h3>
-    <button onclick="refreshData()" class="btn-refresh">🔄 Refresh</button>
 </div>
 
 <div class="table-wrapper">
@@ -98,7 +96,7 @@ window.logout = function() {
   // https://firebase.google.com/docs/web/setup#available-libraries
 
   // Your web app's Firebase configuration
-  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+ import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
   const firebaseConfig = {
     apiKey: "AIzaSyDzCK1hF39bYcx16sc0hCoCfUOdhqtzeVo",
     authDomain: "presensi-app-aabb9.firebaseapp.com",
@@ -132,30 +130,31 @@ document.getElementById("formData").addEventListener("submit", async function(e)
     });
 
     alert("Data tersimpan!");
-    loadData();
 }); // ✅ WAJIB ADA INI
 
 // LOAD DATA
-async function loadData() {
-    const querySnapshot = await getDocs(collection(db, "presensi"));
+function loadData() {
     const table = document.getElementById("dataTable");
+	table.innerHTML = "<tr><td colspan='6'>Loading...</td></tr>";
 
-    table.innerHTML = "";
+    onSnapshot(collection(db, "presensi"), (snapshot) => {
+        table.innerHTML = "";
 
-    querySnapshot.forEach((docSnap) => {
-        const data = docSnap.data();
+        snapshot.forEach((docSnap) => {
+            const data = docSnap.data();
 
-        table.innerHTML += `
-        <tr>
-            <td>${data.nama}</td>
-            <td>${data.niu}</td>
-            <td>${data.kelas}</td>
-            <td>${data.waktu}</td>
-            <td>${data.poin}</td>
-            <td>
-                <button onclick="hapusData('${docSnap.id}')">❌</button>
-            </td>
-        </tr>`;
+            table.innerHTML += `
+            <tr>
+                <td>${data.nama}</td>
+                <td>${data.niu}</td>
+                <td>${data.kelas}</td>
+                <td>${data.waktu}</td>
+                <td>${data.poin}</td>
+                <td>
+                    <button onclick="hapusData('${docSnap.id}')">❌</button>
+                </td>
+            </tr>`;
+        });
     });
 }
 
@@ -163,7 +162,6 @@ async function loadData() {
 window.hapusData = async function(id) {
     await deleteDoc(doc(db, "presensi", id));
     alert("Data dihapus!");
-    loadData();
 };
 function getJadwal(kelas) {
     if (kelas === "Fisika") 
@@ -217,11 +215,9 @@ window.hapusSemua = async function() {
         await Promise.all(promises);
 
         alert("Semua data berhasil dihapus!");
-        loadData(); // 
     }
 }
 loadData();
-
 </script>
 </body>
 </html>
