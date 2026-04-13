@@ -123,7 +123,7 @@ document.getElementById("formData").addEventListener("submit", async function(e)
     });
 
     alert("Data tersimpan!");
-    location.reload();
+    loadData();
 }); // ✅ WAJIB ADA INI
 
 // LOAD DATA
@@ -154,7 +154,7 @@ async function loadData() {
 window.hapusData = async function(id) {
     await deleteDoc(doc(db, "presensi", id));
     alert("Data dihapus!");
-    location.reload();
+    loadData();
 };
 function getJadwal(kelas) {
     if (kelas === "Fisika") 
@@ -212,6 +212,10 @@ window.hapusSemua = async function() {
     }
 }
 loadData();
+
+	window.refreshData = function() {
+    loadData();
+}
 </script>
 </body>
 </html>
