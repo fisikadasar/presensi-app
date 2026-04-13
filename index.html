@@ -100,34 +100,38 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  document.getElementById("formData").addEventListener("submit", async function(e) {
+// SUBMIT
+document.getElementById("formData").addEventListener("submit", async function(e) {
     e.preventDefault();
 
     const nama = document.getElementById("Nama").value;
     const niu = document.getElementById("NIU").value;
     const kelas = document.getElementById("Kelas").value;
 
+    const waktu = new Date();
+    const poin = hitungPoin(kelas, waktu);
+
     await addDoc(collection(db, "presensi"), {
         nama,
         niu,
         kelas,
-        waktu: new Date().toLocaleString(),
-        poin: 0
+        waktu: waktu.toLocaleString(),
+        poin
     });
 
-    alert("Data berhasil disimpan 🔥");
+    alert("Data tersimpan!");
     location.reload();
-});
+}); // ✅ WAJIB ADA INI
 
-// 5. LOAD DATA (STEP 8)
+// LOAD DATA
 async function loadData() {
     const querySnapshot = await getDocs(collection(db, "presensi"));
     const table = document.getElementById("dataTable");
 
     table.innerHTML = "";
 
-    querySnapshot.forEach((doc) => {
-        const data = doc.data();
+    querySnapshot.forEach((docSnap) => {
+        const data = docSnap.data();
 
         table.innerHTML += `
         <tr>
@@ -137,15 +141,58 @@ async function loadData() {
             <td>${data.waktu}</td>
             <td>${data.poin}</td>
             <td>
-				<button onclick="hapusData('${doc.id}')">❌</button>
-    		</td>
+                <button onclick="hapusData('${docSnap.id}')">❌</button>
+            </td>
         </tr>`;
     });
 }
-	window.hapusData = async function(id) {
+
+// DELETE
+window.hapusData = async function(id) {
     await deleteDoc(doc(db, "presensi", id));
     alert("Data dihapus!");
     location.reload();
+};
+function getJadwal(kelas) {
+    if (kelas === "Fisika") 
+        return { praktikum: 1, deadline: 4, hour: 15 };
+
+    if (kelas === "Geofisika") 
+        return { praktikum: 4, deadline: 1, hour: 12 };
+
+    if (kelas === "IUP Physics") 
+        return { praktikum: 5, deadline: 2, hour: 12 };
+}
+
+function getPraktikumTerakhir(submit, hariPraktikum) {
+    let date = new Date(submit);
+
+    let selisih = (submit.getDay() - hariPraktikum + 7) % 7;
+    date.setDate(submit.getDate() - selisih);
+
+    date.setHours(0,0,0,0);
+    return date;
+}
+
+function hitungPoin(kelas, waktuSubmit) {
+    let jadwal = getJadwal(kelas);
+    let submit = new Date(waktuSubmit);
+
+    let praktikum = getPraktikumTerakhir(submit, jadwal.praktikum);
+
+    let deadline = new Date(praktikum);
+    let diff = (jadwal.deadline - jadwal.praktikum + 7) % 7;
+
+    deadline.setDate(praktikum.getDate() + diff);
+    deadline.setHours(jadwal.hour, 0, 0, 0);
+
+    let selisih = (submit - deadline) / (1000 * 60);
+
+    if (selisih <= 0) return 0;
+    if (selisih <= 30) return -5;
+    if (selisih <= 60) return -10;
+    if (selisih < 1440) return -15;
+    return "-50%";
 }
 
 loadData();
