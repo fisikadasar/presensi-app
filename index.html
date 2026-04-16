@@ -343,6 +343,28 @@ document.getElementById("rowsPerPage").addEventListener("change", function() {
     currentPage = 1; // reset ke halaman pertama
     renderTable();
 });
+	window.downloadExcel = function () {
+    if (currentData.length === 0) {
+        alert("Tidak ada data untuk didownload!");
+        return;
+    }
+
+    let csv = "Nama,NIU,Kelas,Waktu,Poin\n";
+
+    currentData.forEach(item => {
+        csv += `${item.nama},${item.niu},${item.kelas},${item.waktu},${item.poin}\n`;
+    });
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "data_presensi.csv";
+    a.click();
+
+    window.URL.revokeObjectURL(url);
+};
 </script>
 </body>
 </html>
