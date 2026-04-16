@@ -1,9 +1,8 @@
-@font-face {
-    font-family: 'Distorsi';
-    src: url('Fridaylovers.ttf');
+{
+    font-family: 'Times New Roman', Times, sans-serif;
 }
 h2 {
-    font-family: 'Distorsi', sans-serif;
+    font-family: 'Times New Roman', Times, sans-serif;
     letter-spacing: 2px;
     font-size: 35px;
 }
